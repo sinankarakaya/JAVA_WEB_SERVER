@@ -50,7 +50,11 @@ public class HttpResponse {
 	}
 	
 	private  void setEtagAndContentLength(String length) {
-		setHeader("Content-Length", length);
+		if(statusCode != 200) {
+			setHeader("Content-Length", "0");
+		}else {
+			setHeader("Content-Length", length);
+		}
 	}
 	
 	private  String createInitalLineAndHeaders() {
@@ -65,7 +69,7 @@ public class HttpResponse {
 		return sb.toString();
 	}
 
-	public  HttpResponse end(String data) {
+	public  void end(String data) {
 		byte[] bytes = data.getBytes(Charsets.UTF_8);
 		
 		if (!headersCreated) {
@@ -76,11 +80,11 @@ public class HttpResponse {
 			_out.flush();
 			headersCreated = true;
 		}
-		
-		_out.println(data);
-		_out.println();
-		_out.flush();
-		return this;
+		if(statusCode == 200) {
+			_out.println(data);
+			_out.println();
+			_out.flush();	
+		}
 	}
 	
 
