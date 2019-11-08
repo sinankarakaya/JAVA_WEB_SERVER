@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.webserver.example.annotation.RequestMapping;
 import com.webserver.example.http.HttpRequest;
+import com.webserver.example.http.HttpResponse;
 import com.webserver.example.http.SocketToRequest;
 
 public class PortListener {
@@ -39,6 +40,10 @@ public class PortListener {
 				new Thread( () ->  {
 					SocketToRequest req = new SocketToRequest(client);
 					HttpRequest request =  req.processData();
+					HttpResponse response = new HttpResponse(client, true);
+					
+					response.setStatusCode(200);
+					response.end("sinan karakaya");
 					
 				}).start();
 			} catch (IOException e) {
