@@ -14,7 +14,7 @@ public class HttpUtil {
 	 * Do it lazily for each thread that need access to one.*/
 	private static final ThreadLocal<MessageDigest> md = new ThreadLocal<MessageDigest>();
 	
-	private static final String _200_OK 		 			= "HTTP/2 200 OK\r\n"; 
+	private static final String _200_OK 		 			= "HTTP/1.1 200 OK\r\n"; 
 	private static final String _201_CREATED 		 		= "HTTP/1.1 201 Created\r\n"; 
 	private static final String _202_ACCEPTED 		 		= "HTTP/1.1 202 Accepted\r\n"; 
 	private static final String _203_NON_AUTHORITATIVE_INFO = "HTTP/1.1 203 Non-Authoritative Information\r\n"; 

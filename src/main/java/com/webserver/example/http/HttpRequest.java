@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
 import org.apache.commons.codec.Charsets;
@@ -20,6 +21,8 @@ public class HttpRequest {
 	private final String requestedPath;	// correct name?
 	private final String version; 
 	private Map<String, String> headers;
+	private final String path;
+	
 	private ImmutableMultimap<String, String> parameters;
 	private String body;
 	private boolean keepAlive;
@@ -60,6 +63,12 @@ public class HttpRequest {
 		body = null;
 		initKeepAlive();
 		parameters = parseParameters(elements[1]);
+		
+		StringTokenizer parse = new StringTokenizer(requestLine);
+		String method = parse.nextToken();
+		String path = parse.nextToken();
+		this.path = path;
+		
 	}
 	
 	public static  HttpRequest of(String raw) {
@@ -197,6 +206,10 @@ public class HttpRequest {
 	
 	public  HttpVerb getMethod() {
 		return method;
+	}
+	
+	public String getPath() {
+		return path;
 	}
 	
 	@Override

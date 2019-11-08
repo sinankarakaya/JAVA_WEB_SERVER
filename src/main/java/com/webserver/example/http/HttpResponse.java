@@ -2,9 +2,16 @@ package com.webserver.example.http;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.codec.Charsets;
@@ -17,6 +24,8 @@ public class HttpResponse {
 
 	private BufferedReader _in ;
 	private PrintWriter _out;
+	private OutputStream _sOut;
+	private InputStream _sIn;
 	private BufferedOutputStream _bufferedOutput;
 	private final Socket _clientSocket;
 	
@@ -29,9 +38,16 @@ public class HttpResponse {
 	public HttpResponse(Socket _clientSocket,boolean keepAlive) {
 		this._clientSocket = _clientSocket;
 		try {
-			_in = new BufferedReader(new InputStreamReader(_clientSocket.getInputStream()));
-			_out = new PrintWriter(_clientSocket.getOutputStream());
+			OutputStream out = this._clientSocket.getOutputStream();
+			InputStream in = this._clientSocket.getInputStream();
+			
+			_sOut = out;
+			_sIn = in;
+			
+			_in = new BufferedReader(new InputStreamReader(_sIn));
+			_out = new PrintWriter(_sOut);
 			_bufferedOutput = new BufferedOutputStream(_clientSocket.getOutputStream());	
+			
 			headers.put("Server", "JAVA SERVER/0.1-SNAPSHOT");
 			headers.put("Date", DateUtil.getCurrentAsString());
 			headers.put("Connection", keepAlive ? "Keep-Alive" : "Close");
@@ -75,17 +91,51 @@ public class HttpResponse {
 		if (!headersCreated) {
 			setEtagAndContentLength(String.valueOf(bytes.length));
 			String initial = createInitalLineAndHeaders();		
-			_out.println(initial);
-			_out.println();
+			_out.print(initial);
 			_out.flush();
 			headersCreated = true;
 		}
+		
 		if(statusCode == 200) {
 			_out.println(data);
-			_out.println();
 			_out.flush();	
 		}
 	}
 	
+	public void sendFile(File file) {
+		try {
+			
+			URL fileURL = file.toURI().toURL();
+	    	InputStream is  = fileURL.openConnection().getInputStream();	
+	    	BufferedReader buf = new BufferedReader(new InputStreamReader(is));
+	    	        
+	    	String line = buf.readLine();
+	    	StringBuilder sb = new StringBuilder();
+	    	        
+	    	while(line != null){
+	    	   sb.append(line).append("\n");
+	    	   line = buf.readLine();
+	    	}
+	    	        
+	    	String data = sb.toString();
+	    	byte[] bytes = data.getBytes();
+	   		
+			if (!headersCreated) {
+				setEtagAndContentLength(String.valueOf(bytes.length));
+				String initial = createInitalLineAndHeaders();		
+				_out.print(initial);
+				_out.flush();
+				headersCreated = true;
+			}
+			
+			if(statusCode == 200) {
+				_out.println(data);
+				_out.flush();	
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 }

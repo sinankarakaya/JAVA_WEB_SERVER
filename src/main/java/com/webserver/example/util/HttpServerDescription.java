@@ -11,6 +11,6 @@ public class HttpServerDescription {
 	public static boolean USE_SSL;
 	public static boolean MULTI_USER=false;
 	public static int REQUEST_TIMEOUT = 45; // MS
-	
+	public static String CONTEX_PATH="";
 	
 }
